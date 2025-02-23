@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  events    Event[]
+  participants Participant[]
+  sentInvites Invite[] @relation("SentInvites")
+  receivedInvites Invite[] @relation("ReceivedInvites")
+}
+
+model Event {
+  id        String   @id @default(uuid())
+  nameEvent String
+  description String
+  latitude  Float
+  longitude Float
+  dateTime  DateTime
+  ownerId   String
+  owner     User     @relation(fields: [ownerId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  participants Participant[]
+  invites   Invite[]
+}
+
+model Participant {
+  id        String   @id @default(uuid())
+  userId    String
+  eventId   String
+  user      User     @relation(fields: [userId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Invite {
+  id        String   @id @default(uuid())
+  senderId  String
+  receiverId String
+  eventId   String
+  status    InviteStatus
+  sender    User     @relation("SentInvites", fields: [senderId], references: [id])
+  receiver  User     @relation("ReceivedInvites", fields: [receiverId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum InviteStatus {
+  PENDENTE
+  ACEITO
+  RECUSADO
+}
