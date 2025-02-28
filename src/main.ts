@@ -10,10 +10,13 @@ async function bootstrap() {
     .setDescription('Documentação da API para organização de eventos')
     .setVersion('1.0')
     .addTag('API')
-    .build()    
+    .addTag('Login')
+    .addTag('Cadastrar')
+    .addTag('Usuario')
+    .build();
 
-    const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api/docs', app, document);
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
 
   await app.listen(process.env.PORT ?? 3000);
 }
