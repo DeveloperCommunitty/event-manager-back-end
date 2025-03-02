@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+
 import { UserModule } from './modules/user/user.module';
 import { RegisterModule } from './modules/register/register.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -9,9 +8,8 @@ import { AuthGuard } from './modules/auth/auth.guard';
 import { InvitesModule } from './modules/Invitation/invite.module';
 @Module({
   imports: [UserModule, RegisterModule, AuthModule, InvitesModule],
-  controllers: [AppController],
+  controllers: [],
   providers: [
-    AppService,
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
