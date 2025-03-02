@@ -21,10 +21,7 @@ export class InviteService {
 
       return invite;
     } catch (error) {
-      throw new HttpException(
-        'Erro ao criar convite',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new HttpException('Erro ao criar convite', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -44,10 +41,7 @@ export class InviteService {
 
       return invites;
     } catch (error) {
-      throw new HttpException(
-        error.message || 'Erro ao listar convites',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException(error.message || 'Erro ao listar convites', HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -68,10 +62,7 @@ export class InviteService {
 
       return invite;
     } catch (error) {
-      throw new HttpException(
-        error.message || 'Erro ao buscar convite',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException(error.message || 'Erro ao buscar convite', HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -90,10 +81,7 @@ export class InviteService {
 
       return updatedInvite;
     } catch (error) {
-      throw new HttpException(
-        error.message || 'Erro ao atualizar convite',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException(error.message || 'Erro ao atualizar convite', HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -112,13 +100,9 @@ export class InviteService {
         status: HttpStatus.NO_CONTENT,
       };
     } catch (error) {
-      throw new HttpException(
-        error.message || 'Erro ao deletar convite',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException(error.message || 'Erro ao deletar convite', HttpStatus.BAD_REQUEST);
     }
   }
-
 
   async findSentInvites(senderId: string) {
     try {
@@ -131,18 +115,12 @@ export class InviteService {
       });
 
       if (!invites || invites.length === 0) {
-        throw new HttpException(
-          'Nenhum convite enviado encontrado',
-          HttpStatus.NOT_FOUND,
-        );
+        throw new HttpException('Nenhum convite enviado encontrado', HttpStatus.NOT_FOUND);
       }
 
       return invites;
     } catch (error) {
-      throw new HttpException(
-        error.message || 'Erro ao listar convites enviados',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException(error.message || 'Erro ao listar convites enviados', HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -157,24 +135,18 @@ export class InviteService {
       });
 
       if (!invites || invites.length === 0) {
-        throw new HttpException(
-          'Nenhum convite recebido encontrado',
-          HttpStatus.NOT_FOUND,
-        );
+        throw new HttpException('Nenhum convite recebido encontrado', HttpStatus.NOT_FOUND);
       }
 
       return invites;
     } catch (error) {
-      throw new HttpException(
-        error.message || 'Erro ao listar convites recebidos',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException(error.message || 'Erro ao listar convites recebidos', HttpStatus.BAD_REQUEST);
     }
   }
 
   async updateStatus(id: string, status: InviteStatus) {
     try {
-      const inviteCheck = await this.prisma.invite.findUnique({ where: { id } });
+      const inviteCheck = await this.prisma.invite.findUnique({ where: { id }, include: { event: true } });
 
       if (!inviteCheck) {
         throw new HttpException('Convite não encontrado', HttpStatus.NOT_FOUND);
@@ -185,12 +157,22 @@ export class InviteService {
         data: { status },
       });
 
+      if (status === InviteStatus.ACEITO) {
+        if (!inviteCheck.receiverId) {
+          throw new HttpException('Convite inválido: destinatário não encontrado', HttpStatus.BAD_REQUEST);
+        }
+
+        await this.prisma.participant.create({
+          data: {
+            userId: inviteCheck.receiverId,
+            eventId: inviteCheck.eventId,
+          },
+        });
+      }
+
       return updatedInvite;
     } catch (error) {
-      throw new HttpException(
-        error.message || 'Erro ao atualizar status do convite',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException(error.message || 'Erro ao atualizar status do convite', HttpStatus.BAD_REQUEST);
     }
   }
 }

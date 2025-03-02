@@ -21,6 +21,7 @@ async function bootstrap() {
     .addTag('Cadastrar')
     .addTag('Usuario')
     .addTag('Convite')
+    .addTag('Evento')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
