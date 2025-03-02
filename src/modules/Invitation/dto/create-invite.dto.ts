@@ -5,7 +5,7 @@ import { InviteStatus } from '@prisma/client';
 export class CreateInviteDto {
   @ApiProperty({
     description: 'ID do usuário que está enviando o convite',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    example: '49fadddb-e13d-4cef-93bb-7238978bd54a',
   })
   @IsUUID()
   senderId: string;
@@ -15,11 +15,12 @@ export class CreateInviteDto {
     example: '123e4567-e89b-12d3-a456-426614174001',
   })
   @IsUUID()
-  receiverId: string;
+  @IsOptional()
+  receiverId?: string;
 
   @ApiProperty({
     description: 'ID do evento ao qual o convite está associado',
-    example: '123e4567-e89b-12d3-a456-426614174002',
+    example: 'cfe69aad-b341-49e5-bb92-1efedcd88b1e',
   })
   @IsUUID()
   eventId: string;
