@@ -1,14 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Delete,
-  Patch,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Patch, Query, UseGuards } from '@nestjs/common';
 import { InviteService } from './invite.service';
 import { CreateInviteDto } from './dto/create-invite.dto';
 import { UpdateInviteDto } from './dto/update-invite.dto';
@@ -16,8 +6,8 @@ import { AuthGuard } from '../auth/auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { InviteStatus } from '@prisma/client';
 
-@ApiTags('Invite')
-@Controller('invites')
+@ApiTags('Convite')
+@Controller('convite')
 export class InviteController {
   constructor(private readonly inviteService: InviteService) {}
 
@@ -64,10 +54,7 @@ export class InviteController {
   @ApiResponse({ status: 404, description: 'Convite não encontrado.' })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor.' })
   @ApiBearerAuth('access_token')
-  async update(
-    @Param('id') id: string,
-    @Body() updateInviteDto: UpdateInviteDto,
-  ) {
+  async update(@Param('id') id: string, @Body() updateInviteDto: UpdateInviteDto) {
     return await this.inviteService.update(id, updateInviteDto);
   }
 
@@ -124,10 +111,7 @@ export class InviteController {
   @ApiResponse({ status: 404, description: 'Convite não encontrado.' })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor.' })
   @ApiBearerAuth('access_token')
-  async updateStatus(
-    @Param('id') id: string,
-    @Query('status') status: InviteStatus, 
-  ) {
+  async updateStatus(@Param('id') id: string, @Query('status') status: InviteStatus) {
     return await this.inviteService.updateStatus(id, status);
   }
 }
