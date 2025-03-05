@@ -13,31 +13,35 @@ enum Role {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  events    Event[]
-  participants Participant[]
-  sentInvites Invite[] @relation("SentInvites")
-  receivedInvites Invite[] @relation("ReceivedInvites")
+  id              String        @id @default(uuid())
+  name            String
+  email           String        @unique
+  password        String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  events          Event[]
+  participants    Participant[]
+  sentInvites     Invite[]      @relation("SentInvites")
+  receivedInvites Invite[]      @relation("ReceivedInvites")
+
+  @@map("users")
 }
 
 model Event {
-  id        String   @id @default(uuid())
-  nameEvent String
-  description String
-  latitude  Float
-  longitude Float
-  dateTime  DateTime
-  ownerId   String
-  owner     User     @relation(fields: [ownerId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String        @id @default(uuid())
+  nameEvent    String
+  description  String
+  latitude     Float
+  longitude    Float
+  dateTime     DateTime
+  ownerId      String
+  owner        User          @relation(fields: [ownerId], references: [id])
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
   participants Participant[]
-  invites   Invite[]
+  invites      Invite[]
+
+  @@map("events")
 }
 
 model Participant {
@@ -45,22 +49,27 @@ model Participant {
   userId    String
   eventId   String
   user      User     @relation(fields: [userId], references: [id])
-  event     Event    @relation(fields: [eventId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("participants")
 }
 
 model Invite {
-  id        String   @id @default(uuid())
-  senderId  String
-  receiverId String
-  eventId   String
-  status    InviteStatus
-  sender    User     @relation("SentInvites", fields: [senderId], references: [id])
-  receiver  User     @relation("ReceivedInvites", fields: [receiverId], references: [id])
-  event     Event    @relation(fields: [eventId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String       @id @default(uuid())
+  senderId   String
+  receiverId String?
+  eventId    String
+  token      String?      @unique
+  status     InviteStatus @default(PENDENTE)
+  sender     User         @relation("SentInvites", fields: [senderId], references: [id])
+  receiver   User?        @relation("ReceivedInvites", fields: [receiverId], references: [id])
+  event      Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  @@map("invites")
 }
 
 enum InviteStatus {

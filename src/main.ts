@@ -5,15 +5,33 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
+
   const config = new DocumentBuilder()
-    .setTitle('NestJS API')
+    .setTitle('Gerenciamento de Evento API')
     .setDescription('Documentação da API para organização de eventos')
     .setVersion('1.0')
-    .addTag('API')
-    .build()    
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+      'access_token',
+    )
+    .addTag('Login')
+    .addTag('Cadastrar')
+    .addTag('Usuario')
+    .addTag('Evento')
+    .addTag('Convite')
+    .build();
 
-    const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api/docs', app, document);
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('/docs', app, document);
 
   await app.listen(process.env.PORT ?? 3000);
 }
