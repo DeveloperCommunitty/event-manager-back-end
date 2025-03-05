@@ -5,8 +5,14 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
+
   const config = new DocumentBuilder()
-    .setTitle('NestJS API')
+    .setTitle('Gerenciamento de Evento API')
     .setDescription('Documentação da API para organização de eventos')
     .setVersion('1.0')
     .addBearerAuth(
@@ -20,8 +26,8 @@ async function bootstrap() {
     .addTag('Login')
     .addTag('Cadastrar')
     .addTag('Usuario')
-    .addTag('Convite')
     .addTag('Evento')
+    .addTag('Convite')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
