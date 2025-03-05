@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/auth.guard';
 import { CreateEventDto } from './dto/createEvent.dto';
@@ -52,7 +52,7 @@ export class EventController {
     return await this.eventService.findOne(id);
   }
   @UseGuards(AuthGuard)
-  @Put(':id')
+  @Patch(':id')
   @ApiOperation({ summary: 'Lista convites enviados por um usuário' })
   @ApiResponse({
     status: 200,
