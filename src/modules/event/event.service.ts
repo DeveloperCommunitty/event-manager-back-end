@@ -17,7 +17,6 @@ export class EventService {
         throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
       }
 
-      // Cria o evento
       const event = await this.prisma.event.create({
         data: {
           nameEvent: createEventDto.nameEvent,
@@ -39,9 +38,9 @@ export class EventService {
     try {
       const events = await this.prisma.event.findMany({
         include: {
-          owner: true, 
-          participants: true, 
-          invites: true, 
+          owner: true,
+          participants: true,
+          invites: true,
         },
       });
 
@@ -63,15 +62,16 @@ export class EventService {
           owner: true,
           participants: {
             include: {
-              user: true, 
+              user: true,
             },
           },
           invites: {
             include: {
-              sender: true, 
-              receiver: true, 
+              sender: true,
+              receiver: true,
             },
           },
+          _count: true,
         },
       });
 
@@ -116,6 +116,7 @@ export class EventService {
     try {
       const event = await this.prisma.event.findUnique({
         where: { id },
+        include: { invites: true, participants: true },
       });
 
       if (!event) {
