@@ -26,6 +26,15 @@ export class EventService {
           dateTime: createEventDto.dateTime,
           ownerId: createEventDto.ownerId,
         },
+        select: {
+          id: true,
+          nameEvent: true,
+          description: true,
+          latitude: true,
+          longitude: true,
+          dateTime: true,
+          ownerId: true,
+        },
       });
 
       return event;
@@ -37,10 +46,37 @@ export class EventService {
   async findAll() {
     try {
       const events = await this.prisma.event.findMany({
-        include: {
-          owner: true,
-          participants: true,
-          invites: true,
+        select: {
+          id: true,
+          nameEvent: true,
+          description: true,
+          latitude: true,
+          longitude: true,
+          dateTime: true,
+          ownerId: true,
+          owner: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          participants: {
+            select: {
+              id: true,
+              userId: true,
+            },
+          },
+          invites: {
+            select: {
+              id: true,
+              senderId: true,
+              receiverId: true,
+              eventId: true,
+              token: true,
+              status: true,
+            },
+          },
         },
       });
 
@@ -58,17 +94,35 @@ export class EventService {
     try {
       const event = await this.prisma.event.findUnique({
         where: { id },
-        include: {
-          owner: true,
+        select: {
+          id: true,
+          nameEvent: true,
+          description: true,
+          latitude: true,
+          longitude: true,
+          dateTime: true,
+          ownerId: true,
+          owner: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
           participants: {
-            include: {
-              user: true,
+            select: {
+              id: true,
+              userId: true,
             },
           },
           invites: {
-            include: {
-              sender: true,
-              receiver: true,
+            select: {
+              id: true,
+              senderId: true,
+              receiverId: true,
+              eventId: true,
+              token: true,
+              status: true,
             },
           },
           _count: true,
@@ -89,6 +143,14 @@ export class EventService {
     try {
       const event = await this.prisma.event.findUnique({
         where: { id },
+        select: {
+          id: true,
+          nameEvent: true,
+          description: true,
+          latitude: true,
+          longitude: true,
+          dateTime: true,
+        },
       });
 
       if (!event) {

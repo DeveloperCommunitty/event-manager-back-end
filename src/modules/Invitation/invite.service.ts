@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Invite, InviteStatus } from '@prisma/client';
+import { InviteStatus } from '@prisma/client';
 import * as crypto from 'crypto';
 import { PrismaService } from 'src/database/prisma.service';
 import { MailService } from '../mail/mail.service';
@@ -25,7 +25,7 @@ export class InviteService {
 
       const frontEndUrl = this.configService.get<string>('FRONT_END');
 
-      const invites: { invite: Invite; inviteLink: string }[] = [];
+      const invites: { invite: any; inviteLink: string }[] = [];
 
       for (const user of users) {
         const token = crypto.randomBytes(32).toString('hex');
@@ -37,6 +37,14 @@ export class InviteService {
             receiverId: user.id,
             eventId,
             token,
+          },
+          select: {
+            id: true,
+            senderId: true,
+            receiverId: true,
+            eventId: true,
+            token: true,
+            status: true,
           },
         });
 
@@ -55,11 +63,102 @@ export class InviteService {
     }
   }
 
+  async findAll() {
+    try {
+      const invites = await this.prisma.invite.findMany({
+        select: {
+          id: true,
+          senderId: true,
+          eventId: true,
+          sender: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          receiver: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          event: {
+            select: {
+              id: true,
+              nameEvent: true,
+              description: true,
+              latitude: true,
+              longitude: true,
+              dateTime: true,
+              ownerId: true,
+            },
+          },
+        },
+      });
+
+      if (!invites.length) {
+        throw new HttpException('Nenhum convite encontrado', HttpStatus.NOT_FOUND);
+      }
+
+      return invites;
+    } catch (error) {
+      throw new HttpException('Erro ao listar convites', HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async findSentInvites(senderId: string) {
+    try {
+      const invites = await this.prisma.invite.findMany({
+        where: { senderId },
+        select: {
+          id: true,
+          senderId: true,
+          eventId: true,
+          status: true,
+          receiver: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          event: {
+            select: {
+              id: true,
+              nameEvent: true,
+              description: true,
+              latitude: true,
+              longitude: true,
+              dateTime: true,
+              ownerId: true,
+            },
+          },
+        },
+      });
+
+      if (!invites.length) {
+        throw new HttpException('Nenhum convite enviado encontrado', HttpStatus.NOT_FOUND);
+      }
+
+      return invites;
+    } catch (error) {
+      throw new HttpException('Erro ao listar convites enviados', HttpStatus.BAD_REQUEST);
+    }
+  }
+
   async acceptInvite(token: string, userId: string) {
     try {
       const invite = await this.prisma.invite.findUnique({
         where: { token },
-        include: { event: true },
+        select: {
+          id: true,
+          senderId: true,
+          receiverId: true,
+          eventId: true,
+          status: true,
+        },
       });
 
       if (!invite) {
@@ -95,6 +194,13 @@ export class InviteService {
     try {
       const invite = await this.prisma.invite.findUnique({
         where: { token },
+        select: {
+          id: true,
+          senderId: true,
+          receiverId: true,
+          eventId: true,
+          status: true,
+        },
       });
 
       if (!invite) {
@@ -116,39 +222,6 @@ export class InviteService {
       return { message: 'Convite recusado!', invite: updatedInvite };
     } catch (error) {
       throw new HttpException(error.message || 'Erro ao recusar convite', HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  async findAll() {
-    try {
-      const invites = await this.prisma.invite.findMany({
-        include: { sender: true, receiver: true, event: true },
-      });
-
-      if (!invites.length) {
-        throw new HttpException('Nenhum convite encontrado', HttpStatus.NOT_FOUND);
-      }
-
-      return invites;
-    } catch (error) {
-      throw new HttpException('Erro ao listar convites', HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  async findSentInvites(senderId: string) {
-    try {
-      const invites = await this.prisma.invite.findMany({
-        where: { senderId },
-        include: { receiver: true, event: true },
-      });
-
-      if (!invites.length) {
-        throw new HttpException('Nenhum convite enviado encontrado', HttpStatus.NOT_FOUND);
-      }
-
-      return invites;
-    } catch (error) {
-      throw new HttpException('Erro ao listar convites enviados', HttpStatus.BAD_REQUEST);
     }
   }
 }
