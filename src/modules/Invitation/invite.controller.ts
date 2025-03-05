@@ -1,10 +1,10 @@
-import { Controller, Get, Post, Body, Param, Delete, Patch, Query, UseGuards } from '@nestjs/common';
-import { InviteService } from './invite.service';
-import { CreateInviteDto } from './dto/create-invite.dto';
-import { UpdateInviteDto } from './dto/update-invite.dto';
-import { AuthGuard } from '../auth/auth.guard';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { InviteStatus } from '@prisma/client';
+import { CurrentUser } from 'src/decorators/current-user.decorator';
+import { AuthUser } from 'src/interface/AuthUser';
+import { AuthGuard } from '../auth/auth.guard';
+import { CreateInviteDto } from './dto/create-invite.dto';
+import { InviteService } from './invite.service';
 
 @ApiTags('Convite')
 @Controller('convite')
@@ -35,43 +35,7 @@ export class InviteController {
   }
 
   @UseGuards(AuthGuard)
-  @Get(':id')
-  @ApiOperation({ summary: 'Lista um convite por id' })
-  @ApiResponse({ status: 200, description: 'Convite listado com sucesso.' })
-  @ApiResponse({ status: 400, description: 'Erro ao listar convite.' })
-  @ApiResponse({ status: 404, description: 'Convite não encontrado.' })
-  @ApiResponse({ status: 500, description: 'Erro interno do servidor.' })
-  @ApiBearerAuth('access_token')
-  async findOne(@Param('id') id: string) {
-    return await this.inviteService.findOne(id);
-  }
-
-  @UseGuards(AuthGuard)
-  @Patch(':id')
-  @ApiOperation({ summary: 'Atualiza um convite por id' })
-  @ApiResponse({ status: 200, description: 'Convite atualizado com sucesso.' })
-  @ApiResponse({ status: 400, description: 'Erro ao atualizar convite.' })
-  @ApiResponse({ status: 404, description: 'Convite não encontrado.' })
-  @ApiResponse({ status: 500, description: 'Erro interno do servidor.' })
-  @ApiBearerAuth('access_token')
-  async update(@Param('id') id: string, @Body() updateInviteDto: UpdateInviteDto) {
-    return await this.inviteService.update(id, updateInviteDto);
-  }
-
-  @UseGuards(AuthGuard)
-  @Delete(':id')
-  @ApiOperation({ summary: 'Deleta um convite por id' })
-  @ApiResponse({ status: 204, description: 'Convite deletado com sucesso.' })
-  @ApiResponse({ status: 400, description: 'Erro ao deletar convite.' })
-  @ApiResponse({ status: 404, description: 'Convite não encontrado.' })
-  @ApiResponse({ status: 500, description: 'Erro interno do servidor.' })
-  @ApiBearerAuth('access_token')
-  async remove(@Param('id') id: string) {
-    return await this.inviteService.remove(id);
-  }
-
-  @UseGuards(AuthGuard)
-  @Get('sent/:senderId')
+  @Get('enviado/:senderId')
   @ApiOperation({ summary: 'Lista convites enviados por um usuário' })
   @ApiResponse({
     status: 200,
@@ -86,32 +50,32 @@ export class InviteController {
   }
 
   @UseGuards(AuthGuard)
-  @Get('received/:receiverId')
-  @ApiOperation({ summary: 'Lista convites recebidos por um usuário' })
+  @Patch('aceitar/:token')
+  @ApiOperation({ summary: 'Aceitar convites enviados para eventos' })
   @ApiResponse({
     status: 200,
-    description: 'Convites recebidos listados com sucesso.',
+    description: 'Convites aceito com sucesso.',
   })
-  @ApiResponse({ status: 400, description: 'Erro ao listar convites recebidos.' })
-  @ApiResponse({ status: 404, description: 'Nenhum convite encontrado.' })
+  @ApiResponse({ status: 400, description: 'Erro ao Aceitar convite.' })
+  @ApiResponse({ status: 404, description: 'Convite inválido ou expirado.' })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor.' })
   @ApiBearerAuth('access_token')
-  async findReceivedInvites(@Param('receiverId') receiverId: string) {
-    return await this.inviteService.findReceivedInvites(receiverId);
+  async acceptInvite(@Param('token') token: string, @CurrentUser() user: AuthUser) {
+    return this.inviteService.acceptInvite(token, user.id);
   }
 
   @UseGuards(AuthGuard)
-  @Patch(':id/status')
-  @ApiOperation({ summary: 'Atualiza o status de um convite' })
+  @Patch('recusar/:token')
+  @ApiOperation({ summary: 'Recusar convites enviados para eventos' })
   @ApiResponse({
     status: 200,
-    description: 'Status do convite atualizado com sucesso.',
+    description: 'Convites recusar com sucesso.',
   })
-  @ApiResponse({ status: 400, description: 'Erro ao atualizar status.' })
-  @ApiResponse({ status: 404, description: 'Convite não encontrado.' })
+  @ApiResponse({ status: 400, description: 'Erro ao Recusar convite.' })
+  @ApiResponse({ status: 404, description: 'Convite inválido ou expirado.' })
   @ApiResponse({ status: 500, description: 'Erro interno do servidor.' })
   @ApiBearerAuth('access_token')
-  async updateStatus(@Param('id') id: string, @Query('status') status: InviteStatus) {
-    return await this.inviteService.updateStatus(id, status);
+  async rejectInvite(@Param('token') token: string, @CurrentUser() user: AuthUser) {
+    return this.inviteService.rejectInvite(token, user.id);
   }
 }

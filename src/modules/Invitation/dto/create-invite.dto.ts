@@ -1,38 +1,30 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsUUID, IsEnum, IsOptional } from 'class-validator';
 import { InviteStatus } from '@prisma/client';
+import { IsOptional, IsUUID } from 'class-validator';
 
 export class CreateInviteDto {
   @ApiProperty({
     description: 'ID do usuário que está enviando o convite',
-    example: '49fadddb-e13d-4cef-93bb-7238978bd54a',
+    example: 'e99304cc-48ff-407e-a2d1-1625d51d3179',
   })
   @IsUUID()
   senderId: string;
 
-  @ApiProperty({
-    description: 'ID do usuário que está recebendo o convite',
-    example: '123e4567-e89b-12d3-a456-426614174001',
-  })
   @IsUUID()
   @IsOptional()
   receiverId?: string;
 
   @ApiProperty({
     description: 'ID do evento ao qual o convite está associado',
-    example: 'cfe69aad-b341-49e5-bb92-1efedcd88b1e',
+    example: '867936a2-9b28-46ef-b591-a76c9df7e5d3',
   })
   @IsUUID()
   eventId: string;
 
-  @ApiProperty({
-    description: 'Status do convite',
-    enum: InviteStatus,
-    enumName: 'InviteStatus',
-    example: InviteStatus.PENDENTE,
-    required: false,
-  })
-  @IsEnum(InviteStatus)
+  @IsUUID()
+  @IsOptional()
+  token?: string;
+
   @IsOptional()
   status?: InviteStatus;
 }
